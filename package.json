@@ -1,0 +1,20 @@
+{
+  "name": "backend-production",
+  "version": "1.0.0",
+  "description": "Practice for backend engineering",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js"
+  },
+  "keywords": [
+    "Javascript",
+    "backend"
+  ],
+  "author": "Tushar Sharma",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.0",
+    "prettier": "^3.2.5"
+  }
+}
