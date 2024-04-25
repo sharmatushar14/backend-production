@@ -1,0 +1,31 @@
+// require('dotenv').config()
+import dotenv from "dotenv";
+import connectDB from "./db/index.js";
+import mongoose from "mongoose";
+
+
+dotenv.config({
+    path: "./env"
+});
+
+connectDB()
+
+// Just for Demo purpose
+//Immediately Invoked Function Expression--> Another way to connect to databases and listening over ports
+// (async ()=>{
+//     try {
+//         await mongoose.connect(`${process.env.MONGODB_URL}`);
+//         console.log('DB Connected');
+//         app.on('Error', ()=>{
+//             console.error('ERROR:', error)
+//             throw error
+//         })
+//         app.listen(process.env.PORT, ()=>{
+//             console.log(`Listening on PORT: ${process.env.PORT}`);
+//         })
+//     } catch(error) {
+//         console.error('ERROR:', error);
+//         throw error
+//     }
+// })()
+
