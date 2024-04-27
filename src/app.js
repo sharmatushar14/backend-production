@@ -14,5 +14,12 @@ app.use(express.urlencoded({extended: true, limit: "16kb"}))
 app.use(express.static('public'))
 app.use(cookieParser())
 
+//Routes Import
+import UserRouter from "./routes/user.routes.js"
+
+//Routes Declaration
+app.use('/api/v1/users', UserRouter)
+//http://localhost:8000/api/v1/users/register
+
 export default app; //can have only 1 export default
 //export default is used for exporting a single value, while export { } is used for exporting multiple values from a module.
