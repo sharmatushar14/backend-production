@@ -43,13 +43,22 @@ const userSchema = new Schema({
 })
 
 userSchema.pre('save', async function(next){
-    if(!this.isModified('password')) return next();
-    this.password = await bcrypt.hash(this.password, 10);
-    next();
+  
+    try {
+        if(!this.isModified('password')) return next();
+        this.password = await bcrypt.hash(this.password, 10);
+        next();
+    } catch (error) {
+        return next(error); //Pass error  to the next middleware
+    }
 })
 
 userSchema.methods.isPasswordCorrect =  async function(password){
-    return await bcrypt.compare(password, this.password)
+   try {
+     return await bcrypt.compare(password, this.password)
+   } catch (error) {
+     return false; //Return false in case of error
+   }
 }
 
 //This works complete fastly so need of async and await
@@ -75,9 +84,10 @@ userSchema.methods.generateRefreshToken = function(){
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
-            expiresIn: process.env.REFRESH_TOKEN_SECRET
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
         }
     )
 }
 
 export const User = mongoose.model('User', userSchema);
+//User--> Will be used in controllers to do findById and 'User' is saved as users in the MongoDB database
