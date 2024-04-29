@@ -326,7 +326,83 @@ const updateUserCoverImage =  asyncHandler(async(req, res)=>{
     return res
     .status(200)
     .json(
-        new ApiResponse(200, user, "Cover Image Updated Successfully")
+        new ApiResponse(200, req.user, "Cover Image Updated Successfully")
+    )
+})
+
+const getUserChannelProfile = asyncHandler(async(req, res)=>{
+    const {username} = req.params
+    if(!username){
+        throw new ApiError(404, "Username not found")
+    }
+
+    //Aggregation Pipelines--> [{}, {}, {}] 3 Pipelines
+    //The concept is simple that the output of prev pipeline will be used as input for next pipline
+    const channel = await User.aggregate([
+        {
+            $match: {
+                username: username?.toLowerCase()
+            }
+        }, 
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: '_id', //As this field is present in User Model and we got 1 document with the desired username as we used the $match operation above
+                //to find out that what subs and to whom the current username has done
+                foreignField: "channel",
+                as: "subscribers"
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: '_id', //As this field is present in User Model and we got 1 document with the desired username as we used the $match operation above
+                //to find out that what subs and to whom the current username has done
+                foreignField: "subscriber",
+                as: "subscribedTo"
+            }
+        },
+        {
+            $addFields: {
+                subscribersCount: {
+                    //$size works as count here
+                    $size: "$subscribers" // $, coz subscribers is a field now in the document
+                },
+                channelsSubscribedToCount: {
+                    $size: "$subscribedTo"
+                },
+                isSubscribed: {
+                    $cond: {
+                        //3 parameters of $cond: {if, then, else}
+                        if: {$in: [req.user?._id, "$subscribers.subscriber"]},
+                        then: true,
+                        else: false
+                    }
+                }
+            }
+        },
+        {
+            $project: {
+                fullName: 1,
+                username: 1,
+                subscribersCount: 1,
+                channelsSubscribedToCount: 1,
+                isSubscribed: 1,
+                avatar: 1,
+                coverImage: 1,
+                email: 1
+            }
+        }
+    ])
+
+    if(!channel?.length){
+        throw new ApiError(404, "Channel Does Not Exist")
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, channel[0], "User Channel Fetched Successfully!")
     )
 })
 
@@ -338,6 +414,7 @@ export {registerUser,
         getCurrentUser,
         updateAccountDetails,
         updateAvatar,
-        updateUserCoverImage
+        updateUserCoverImage,
+        getUserChannelProfile
 }
 
