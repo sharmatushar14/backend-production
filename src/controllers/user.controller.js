@@ -106,7 +106,7 @@ const loginUser = asyncHandler(async(req, res)=>{
 
     if(!username && !email){
         //Both of them are absent
-        throw new ApiError(400, "username or email is required")
+        throw new ApiError(400, "Username or email is required")
     }
     //if(!(username || email)) which means when !(false ||  false) --> make it true, hence when both of thema are absent
 
@@ -152,8 +152,8 @@ const logoutUser = asyncHandler(async(req, res)=>{
     await User.findByIdAndUpdate(
         req.user._id, 
         {
-            $set: {
-                refreshToken: undefined
+            $unset: {
+                refreshToken: 1
             }
         },
         {
@@ -168,7 +168,7 @@ const logoutUser = asyncHandler(async(req, res)=>{
 
     return res.status(200)
     .clearCookie("accessToken", options)
-    .clearCookie("refresToken", options)
+    .clearCookie("refreshToken", options)
     .json(new ApiResponse(200, {}, 'User Logged Out Successfully'))
 })
 
@@ -207,6 +207,9 @@ const refreshAccessToken =  asyncHandler(async(req, res)=>{
         }
 
         const {accessToken, newRefreshToken} = await generateAccessAndRefreshTokens(user._id);
+        if(!newRefreshToken){
+            throw new ApiError(503, "Refresh Token failed to generate")
+        } //ToDo: Check for Refresh Token Generation
 
         return res
         .status(200)
@@ -254,6 +257,15 @@ const updateAccountDetails = asyncHandler(async(req, res)=>{
     if(!fullName || !email){
         //If any one of them is not recieved, then we will throw error
         throw new ApiError(400, "All fields are required")
+    }
+
+    //If emailId the user is trying to update already exists in the database
+    const existedUser = await User.findOne({
+        email: email //just email from ES6
+    })
+
+    if(existedUser){
+        throw new ApiError(410, `User with ${email} already exists`)
     }
 
     const user = await User.findByIdAndUpdate(
