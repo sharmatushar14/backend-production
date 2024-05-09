@@ -45,12 +45,12 @@ const getUserPlaylists  = asyncHandler(async(req, res)=>{
 })
 
 const getPlaylistById = asyncHandler(async(req, res)=>{
-    const {playlistID} = req.params
-    if(!isValidObjectId(playlistID)){
+    const {playlistId} = req.params
+    if(!isValidObjectId(playlistId)){
         throw new ApiError(401, "Not Valid PlaylistID")
     }
 
-    const playlist = await Playlist.findById(playlistID)
+    const playlist = await Playlist.findById(playlistId)
     if(!playlist){
         throw new ApiError(404, "PlayList not found")
     }
