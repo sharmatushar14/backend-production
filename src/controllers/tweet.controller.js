@@ -40,12 +40,12 @@ const getUserTweets = asyncHandler(async(req,res)=>{
 })
 
 const updateTweet =  asyncHandler(async(req,res)=>{
-    const {tweetID} = req.params
+    const {tweetId} = req.params
     const {newContent} = req.body
-    if(!isValidObjectId(tweetID)){
+    if(!isValidObjectId(tweetId)){
         throw new ApiError(404, "Invalid Tweet Id")
     }
-    const existingTweet = await Tweet.findOne({_id: tweetID, owner: req.user._id})
+    const existingTweet = await Tweet.findOne({_id: tweetId, owner: req.user._id})
     if(!existingTweet){
         throw new ApiError(401, `Tweet does not exist with user ${req.user.username} which you are trying to update`)      
     }
